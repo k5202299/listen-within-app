@@ -3,12 +3,12 @@ import json, os
 from datetime import datetime
 
 app = Flask(__name__)
-app.secret_key = os.environ.get('SECRET_KEY', 'lw-dev-secret-2026')
+app.secret_key = os.environ.get('SECRET_KEY') or os.urandom(24).hex()
 
 BASE        = os.path.dirname(os.path.abspath(__file__))
 DATA_FILE   = os.path.join(BASE, 'data.json')
 DATABASE_URL = os.environ.get('DATABASE_URL', '')
-APP_PASSWORD = os.environ.get('APP_PASSWORD', 'LW2026')
+APP_PASSWORD = os.environ.get('APP_PASSWORD', 'LW2026')  # 本機預設；雲端請在 Railway 設定 APP_PASSWORD
 
 # ── Database ──────────────────────────────────────────────────────────────────
 
