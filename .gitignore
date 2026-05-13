@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.env
+nohup.out
+*.log
+presentation.pptx
+dashboard.html

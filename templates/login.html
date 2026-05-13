@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Listen Within | 登入</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;
+  background:linear-gradient(160deg,#1a2d4a 0%,#2c4a72 55%,#4a7fb5 100%);
+  min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.card{background:white;border-radius:22px;padding:42px 36px;width:100%;max-width:360px;
+  box-shadow:0 30px 70px rgba(0,0,0,.35);text-align:center}
+.mark{font-size:30px;color:#1a2d4a;margin-bottom:10px}
+.brand{font-size:17px;font-weight:800;color:#1a2d4a;letter-spacing:.3px}
+.sub{font-size:12px;color:#94a3b8;margin-top:4px;margin-bottom:34px}
+label{display:block;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;
+  letter-spacing:.6px;margin-bottom:8px;text-align:left}
+input[type=password]{width:100%;padding:14px 16px;border:1.5px solid #e2e8f0;border-radius:11px;
+  font-size:16px;font-family:inherit;background:#fafafa;transition:border .2s;
+  -webkit-text-security:disc}
+input[type=password]:focus{outline:none;border-color:#1a2d4a;background:white}
+.btn{width:100%;padding:14px;background:#1a2d4a;color:white;border:none;border-radius:11px;
+  font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:14px;
+  transition:background .2s;letter-spacing:.3px}
+.btn:hover{background:#243d63}
+.btn:active{background:#1a2d4a;transform:scale(.98)}
+.error{color:#dc2626;font-size:13px;margin-top:14px;background:#fff5f5;
+  padding:10px 14px;border-radius:8px;border:1px solid #fecaca}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="mark">✦</div>
+  <div class="brand">Listen Within</div>
+  <div class="sub">療癒之心｜專案管理</div>
+  <form method="POST">
+    <label>密碼</label>
+    <input type="password" name="password" placeholder="請輸入密碼" autofocus autocomplete="current-password">
+    <button type="submit" class="btn">進入</button>
+    {% if error %}<div class="error">{{ error }}</div>{% endif %}
+  </form>
+</div>
+</body>
+</html>

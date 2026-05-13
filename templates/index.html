@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>Listen Within | 專案管理</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;background:#eef2f7;color:#1e293b;min-height:100vh}
+
+/* Header */
+.header{background:linear-gradient(135deg,#1a2d4a 0%,#2c4a72 100%);color:white;padding:18px 28px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 12px rgba(0,0,0,.2)}
+.header-left h1{font-size:17px;font-weight:700;letter-spacing:.3px}
+.header-left p{font-size:12px;opacity:.6;margin-top:3px}
+.header-right{font-size:12px;opacity:.65;text-align:right}
+
+/* Tabs */
+.tabs{background:white;border-bottom:1px solid #e2e8f0;padding:0 28px;display:flex;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.tab{padding:15px 18px;cursor:pointer;font-size:14px;border-bottom:2.5px solid transparent;color:#64748b;transition:all .2s;white-space:nowrap}
+.tab.active{color:#1a2d4a;border-bottom-color:#1a2d4a;font-weight:600}
+.tab:hover:not(.active){color:#334155}
+
+/* Content */
+.content{padding:24px 28px;max-width:1280px;margin:0 auto}
+.tab-panel{display:none}.tab-panel.active{display:block}
+
+/* Cards */
+.card{background:white;border-radius:14px;padding:22px;box-shadow:0 1px 4px rgba(0,0,0,.07);margin-bottom:18px}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.card-title{font-size:12px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.8px}
+
+/* Grid */
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:18px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+
+/* Stat */
+.stat{background:white;border-radius:14px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+.stat .s-label{font-size:11px;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.stat .s-value{font-size:30px;font-weight:800;color:#1a2d4a;margin:6px 0 4px}
+.stat .s-sub{font-size:12px;color:#64748b}
+
+/* Progress */
+.prog-bar{height:5px;background:#f1f5f9;border-radius:3px;margin-top:10px}
+.prog-fill{height:100%;background:linear-gradient(90deg,#1a2d4a,#4a7fb5);border-radius:3px;transition:width .4s}
+
+/* Milestones */
+.milestone-item{display:flex;align-items:center;padding:11px 0;border-bottom:1px solid #f1f5f9}
+.milestone-item:last-child{border-bottom:none}
+.milestone-item input[type=checkbox]{width:17px;height:17px;cursor:pointer;margin-right:12px;accent-color:#1a2d4a;flex-shrink:0}
+.milestone-item .m-name{flex:1;font-size:14px;transition:all .2s}
+.milestone-item .m-name.done{text-decoration:line-through;color:#94a3b8}
+.milestone-item .m-date{font-size:12px;color:#94a3b8;background:#f8fafc;padding:3px 10px;border-radius:20px}
+
+/* Risks */
+.risk-item{display:flex;align-items:center;padding:9px 0;border-bottom:1px solid #f1f5f9}
+.risk-item:last-child{border-bottom:none}
+.badge{font-size:10px;padding:3px 9px;border-radius:20px;font-weight:700;margin-right:10px;flex-shrink:0}
+.badge-high{background:#fee2e2;color:#dc2626}
+.badge-medium{background:#fef3c7;color:#d97706}
+.badge-low{background:#dcfce7;color:#16a34a}
+.risk-item .r-desc{font-size:13px;flex:1}
+
+/* Kanban */
+.kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;overflow-x:auto}
+.k-col{}
+.k-col-head{font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;padding:9px 12px;background:#f8fafc;border-radius:10px 10px 0 0;display:flex;align-items:center;justify-content:space-between;border:1px solid #e2e8f0;border-bottom:none}
+.k-col-head .k-count{background:white;border-radius:10px;padding:1px 8px;font-size:11px;border:1px solid #e2e8f0}
+.k-body{min-height:120px;padding:8px;background:#f8fafc;border-radius:0 0 10px 10px;border:1px solid #e2e8f0}
+
+/* Video card */
+.v-card{background:white;border-radius:9px;padding:13px;margin-bottom:8px;box-shadow:0 1px 3px rgba(0,0,0,.07);cursor:pointer;transition:all .2s;border-left:3px solid #e2e8f0}
+.v-card:hover{box-shadow:0 4px 12px rgba(0,0,0,.12);transform:translateY(-1px)}
+.v-card.status-企劃中{border-left-color:#94a3b8}
+.v-card.status-待拍攝{border-left-color:#f59e0b}
+.v-card.status-剪輯中{border-left-color:#3b82f6}
+.v-card.status-待上線{border-left-color:#8b5cf6}
+.v-card.status-已上線{border-left-color:#10b981}
+.v-title{font-size:13px;font-weight:600;line-height:1.4;margin-bottom:7px;color:#1e293b}
+.v-tags{display:flex;flex-wrap:wrap;gap:4px}
+.v-tag{font-size:10px;padding:2px 7px;border-radius:5px;background:#eff6ff;color:#3b82f6;font-weight:500}
+.v-tag.yt{background:#fff1f2;color:#e11d48}
+.v-tag.tk{background:#f0fdf4;color:#16a34a}
+.v-tag.ig{background:#fdf4ff;color:#a21caf}
+.v-type-tag{font-size:10px;color:#94a3b8;margin-top:5px}
+
+/* Move buttons */
+.move-btns{display:flex;gap:3px;margin-top:8px}
+.move-btn{font-size:10px;padding:2px 7px;border:1px solid #e2e8f0;border-radius:5px;cursor:pointer;background:white;color:#64748b;transition:all .15s}
+.move-btn:hover{background:#1a2d4a;color:white;border-color:#1a2d4a}
+
+/* Modal */
+.overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(2px)}
+.overlay.open{display:flex}
+.modal{background:white;border-radius:18px;padding:28px;width:580px;max-height:85vh;overflow-y:auto;box-shadow:0 25px 60px rgba(0,0,0,.25)}
+.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
+.modal-head h2{font-size:18px;font-weight:700;color:#1a2d4a}
+.modal-close{background:none;border:none;font-size:22px;color:#94a3b8;cursor:pointer;padding:0 4px;line-height:1}
+.modal-close:hover{color:#1e293b}
+
+/* Form */
+.fg{margin-bottom:15px}
+.fg label{display:block;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.fg input,.fg select,.fg textarea{width:100%;padding:10px 13px;border:1.5px solid #e2e8f0;border-radius:9px;font-size:14px;font-family:inherit;background:#fafafa;transition:border .2s,background .2s}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:#1a2d4a;background:white}
+.fg textarea{resize:vertical;min-height:75px;line-height:1.5}
+.fg-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fg-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+
+/* Metrics */
+.metric-box{text-align:center}
+.metric-box label{font-size:11px;color:#94a3b8;display:block;margin-bottom:5px}
+.metric-box input{text-align:center;font-size:16px;font-weight:700;color:#1a2d4a}
+
+/* Buttons */
+.btn{padding:10px 20px;border-radius:9px;cursor:pointer;font-size:14px;font-weight:600;border:none;transition:all .2s;font-family:inherit}
+.btn-primary{background:#1a2d4a;color:white}
+.btn-primary:hover{background:#243d63}
+.btn-ghost{background:#f1f5f9;color:#475569}
+.btn-ghost:hover{background:#e2e8f0}
+.btn-danger{background:#fee2e2;color:#dc2626}
+.btn-danger:hover{background:#fecaca}
+.btn-sm{padding:7px 14px;font-size:13px}
+.btn-row{display:flex;gap:10px;justify-content:flex-end;margin-top:22px;padding-top:18px;border-top:1px solid #f1f5f9}
+
+/* Add button */
+.add-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px;border:2px dashed #cbd5e1;border-radius:9px;cursor:pointer;color:#94a3b8;background:none;font-size:13px;width:100%;transition:all .2s;font-family:inherit;margin-top:6px}
+.add-btn:hover{border-color:#1a2d4a;color:#1a2d4a;background:#f8fafc}
+
+/* Log */
+.log-item{padding:16px 0;border-bottom:1px solid #f1f5f9}
+.log-item:last-child{border-bottom:none}
+.log-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.log-date{font-size:11px;color:#94a3b8;background:#f8fafc;padding:2px 10px;border-radius:20px}
+.log-del{font-size:11px;color:#fca5a5;cursor:pointer;background:none;border:none;font-family:inherit}
+.log-del:hover{color:#dc2626}
+.log-content{font-size:14px;line-height:1.7;color:#334155;white-space:pre-wrap}
+
+/* Notes */
+.notes-area{width:100%;min-height:110px;padding:13px;border:1.5px solid #e2e8f0;border-radius:9px;font-size:14px;font-family:inherit;resize:vertical;line-height:1.6;background:#fafafa}
+.notes-area:focus{outline:none;border-color:#1a2d4a;background:white}
+.save-toast{font-size:12px;color:#10b981;display:none;margin-left:10px}
+
+/* Team */
+.team-chip{display:inline-block;padding:5px 14px;background:#eff6ff;color:#1a2d4a;border-radius:20px;font-size:13px;font-weight:500;margin:3px}
+
+/* Empty */
+.empty{text-align:center;padding:32px 20px;color:#94a3b8}
+.empty .e-icon{font-size:36px;margin-bottom:10px}
+.empty p{font-size:13px}
+
+/* Milestone editable inputs */
+.m-name-input{flex:1;border:1.5px solid #e2e8f0;border-radius:7px;padding:6px 10px;font-size:13px;font-family:inherit;background:#fafafa;margin-right:8px;min-width:0}
+.m-name-input:focus{outline:none;border-color:#1a2d4a;background:white}
+.m-name-input.done{text-decoration:line-through;color:#94a3b8}
+.m-date-input{width:132px;border:1.5px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;font-family:inherit;background:#fafafa;margin-right:6px;color:#475569;flex-shrink:0}
+.m-date-input:focus{outline:none;border-color:#1a2d4a;background:white}
+.m-del-btn{background:none;border:none;color:#fca5a5;cursor:pointer;font-size:17px;padding:2px 5px;line-height:1;transition:color .2s;flex-shrink:0}
+.m-del-btn:hover{color:#dc2626}
+/* Video card date */
+.v-date{font-size:10px;color:#94a3b8;margin-top:6px;display:flex;align-items:center;gap:3px}
+/* Status color dot */
+.status-dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:5px}
+.dot-企劃中{background:#94a3b8}
+.dot-待拍攝{background:#f59e0b}
+.dot-剪輯中{background:#3b82f6}
+.dot-待上線{background:#8b5cf6}
+.dot-已上線{background:#10b981}
+
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:#f1f5f9}
+::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}
+
+/* Logout button */
+.logout-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);
+  color:white;padding:6px 14px;border-radius:20px;font-size:12px;cursor:pointer;
+  font-family:inherit;transition:background .2s}
+.logout-btn:hover{background:rgba(255,255,255,.25)}
+
+/* ── Mobile ── */
+@media(max-width:768px){
+  .header{flex-direction:column;gap:10px;padding:14px 16px}
+  .header-right{text-align:left;font-size:11px}
+  .header-left h1{font-size:15px}
+  .tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;padding:0 16px}
+  .tab{padding:12px 12px;font-size:13px;white-space:nowrap}
+  .content{padding:14px 16px}
+  .grid-4{grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+  .grid-2{grid-template-columns:1fr}
+  .stat .s-value{font-size:22px}
+  .kanban{display:flex;overflow-x:auto;-webkit-overflow-scrolling:touch;gap:10px;padding-bottom:12px}
+  .k-col{min-width:210px;flex-shrink:0}
+  .modal{width:95vw;max-width:95vw;padding:20px 18px;border-radius:16px}
+  .modal-head h2{font-size:16px}
+  .fg-row,.fg-row3{grid-template-columns:1fr}
+  .btn-row{flex-wrap:wrap;gap:8px}
+  .card{padding:16px}
+  .add-btn{font-size:13px}
+  .v-card{padding:10px}
+  .v-title{font-size:12px}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>✦ Listen Within 療癒之心｜社群代操</h1>
+    <p>{{ data.client }} &nbsp;·&nbsp; {{ data.start_date }} → {{ data.end_date }}</p>
+  </div>
+  <div class="header-right">
+    <div>成員：{{ data.team_members | join('、') }}</div>
+    <div style="margin-top:4px;display:flex;align-items:center;gap:10px">
+      <span>第一季檢核：2026-08-25</span>
+      <button class="logout-btn" onclick="location.href='/logout'">登出</button>
+    </div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('overview')">📋 專案概覽</div>
+  <div class="tab" onclick="switchTab('videos')">🎬 影片追蹤</div>
+  <div class="tab" onclick="switchTab('logs')">💬 討論紀錄</div>
+</div>
+
+<div class="content">
+
+<!-- ═══ TAB 1: 概覽 ═══ -->
+<div id="tab-overview" class="tab-panel active">
+
+  <!-- Stats row -->
+  <div class="grid-4">
+    <div class="stat">
+      <div class="s-label">影片總數</div>
+      <div class="s-value" id="stat-total">0</div>
+      <div class="s-sub">已企劃</div>
+    </div>
+    <div class="stat">
+      <div class="s-label">已上線</div>
+      <div class="s-value" id="stat-live">0</div>
+      <div class="s-sub">支影片</div>
+    </div>
+    <div class="stat">
+      <div class="s-label">里程碑進度</div>
+      <div class="s-value" id="stat-milestone">0/3</div>
+      <div class="prog-bar"><div class="prog-fill" id="milestone-prog" style="width:0%"></div></div>
+    </div>
+    <div class="stat">
+      <div class="s-label">距第一季檢核</div>
+      <div class="s-value" id="stat-days">—</div>
+      <div class="s-sub">天</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <!-- Milestones -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">里程碑</div>
+      </div>
+      <div id="milestone-list"></div>
+    </div>
+
+    <!-- Risks -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">已知風險</div>
+      </div>
+      <div id="risk-list"></div>
+    </div>
+  </div>
+
+  <!-- Team -->
+  <div class="card">
+    <div class="card-header"><div class="card-title">團隊</div></div>
+    <div id="team-list"></div>
+  </div>
+
+  <!-- Notes -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">備註</div>
+      <span class="save-toast" id="notes-toast">✓ 已儲存</span>
+    </div>
+    <textarea class="notes-area" id="notes-area" placeholder="輸入備註…"></textarea>
+    <div style="margin-top:10px;text-align:right">
+      <button class="btn btn-primary btn-sm" onclick="saveNotes()">儲存備註</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══ TAB 2: 影片追蹤 ═══ -->
+<div id="tab-videos" class="tab-panel">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+    <div style="font-size:13px;color:#64748b">點擊影片卡片可編輯詳細內容，點「→」可移動狀態</div>
+    <button class="btn btn-primary btn-sm" onclick="openAddVideo()">＋ 新增影片</button>
+  </div>
+  <div class="kanban" id="kanban-board"></div>
+</div>
+
+<!-- ═══ TAB 3: 討論紀錄 ═══ -->
+<div id="tab-logs" class="tab-panel">
+  <div style="margin-bottom:18px">
+    <button class="btn btn-primary" onclick="openAddLog()">＋ 新增討論紀錄</button>
+    <span style="font-size:12px;color:#94a3b8;margin-left:12px">每次與 AI 討論後，把重點記在這裡</span>
+  </div>
+  <div class="card">
+    <div id="log-list"></div>
+  </div>
+</div>
+
+</div><!-- /content -->
+
+<!-- ═══ Modal: Video ═══ -->
+<div class="overlay" id="video-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="vm-title">影片詳情</h2>
+      <button class="modal-close" onclick="closeModal('video-modal')">×</button>
+    </div>
+    <input type="hidden" id="vm-id">
+
+    <div class="fg-row">
+      <div class="fg">
+        <label>影片名稱</label>
+        <input id="vm-name" type="text" placeholder="影片標題">
+      </div>
+      <div class="fg">
+        <label>發布平台</label>
+        <select id="vm-platform">
+          <option>TK</option>
+          <option>YT</option>
+          <option>IG</option>
+          <option>TK+YT</option>
+          <option>TK+IG</option>
+          <option>YT+IG</option>
+          <option>TK+YT+IG</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="fg-row">
+      <div class="fg">
+        <label>內容類型</label>
+        <input id="vm-type" type="text" placeholder="例：ASMR 感官引流">
+      </div>
+      <div class="fg">
+        <label>時長</label>
+        <input id="vm-duration" type="text" placeholder="例：60-90秒">
+      </div>
+    </div>
+
+    <div class="fg">
+      <label>腳本說明</label>
+      <textarea id="vm-script" placeholder="腳本大綱…"></textarea>
+    </div>
+
+    <div class="fg">
+      <label>貼文文案</label>
+      <textarea id="vm-caption" style="min-height:60px" placeholder="文案內容…"></textarea>
+    </div>
+
+    <div class="fg">
+      <label>拍攝注意事項</label>
+      <textarea id="vm-shoot" style="min-height:60px" placeholder="器材、場地、注意事項…"></textarea>
+    </div>
+
+    <div class="fg-row">
+      <div class="fg">
+        <label>上線日期</label>
+        <input id="vm-date" type="date">
+      </div>
+      <div class="fg">
+        <label>狀態</label>
+        <select id="vm-status">
+          <option>企劃中</option>
+          <option>待拍攝</option>
+          <option>剪輯中</option>
+          <option>待上線</option>
+          <option>已上線</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="fg">
+      <label>數據（上線後填寫）</label>
+      <div class="fg-row3">
+        <div class="metric-box">
+          <label>觀看數</label>
+          <input id="vm-views" type="number" value="0">
+        </div>
+        <div class="metric-box">
+          <label>按讚數</label>
+          <input id="vm-likes" type="number" value="0">
+        </div>
+        <div class="metric-box">
+          <label>留言數</label>
+          <input id="vm-comments" type="number" value="0">
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-danger btn-sm" id="vm-del-btn" onclick="deleteVideo()">刪除</button>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('video-modal')">取消</button>
+      <button class="btn btn-primary btn-sm" onclick="saveVideo()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Modal: Log ═══ -->
+<div class="overlay" id="log-modal">
+  <div class="modal" style="width:520px">
+    <div class="modal-head">
+      <h2>新增討論紀錄</h2>
+      <button class="modal-close" onclick="closeModal('log-modal')">×</button>
+    </div>
+    <div class="fg">
+      <label>討論重點</label>
+      <textarea id="lm-content" style="min-height:160px" placeholder="把這次討論的結論、決定、待辦事項記在這裡…"></textarea>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('log-modal')">取消</button>
+      <button class="btn btn-primary btn-sm" onclick="saveLog()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const STATUSES = ['企劃中','待拍攝','剪輯中','待上線','已上線'];
+let appData = {{ data | tojson }};
+let editingVideoId = null;
+
+// ── Init ──
+function init() {
+  renderOverview();
+  renderKanban();
+  renderLogs();
+}
+
+// ── Tab switch ──
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t,i)=>{
+    const names=['overview','videos','logs'];
+    t.classList.toggle('active', names[i]===name);
+  });
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+}
+
+// ── Overview ──
+function renderOverview() {
+  const videos = appData.videos||[];
+  const milestones = appData.milestones||[];
+
+  document.getElementById('stat-total').textContent = videos.length;
+  document.getElementById('stat-live').textContent = videos.filter(v=>v.status==='已上線').length;
+
+  const done = milestones.filter(m=>m.done).length;
+  document.getElementById('stat-milestone').textContent = done+'/'+milestones.length;
+  document.getElementById('milestone-prog').style.width = (milestones.length?done/milestones.length*100:0)+'%';
+
+  const end = new Date('2026-08-25');
+  const today = new Date();
+  const diff = Math.max(0, Math.ceil((end-today)/86400000));
+  document.getElementById('stat-days').textContent = diff;
+
+  // Milestones
+  renderMilestones();
+
+  // Risks
+  const severityLabel = {high:'高',medium:'中',low:'低'};
+  const rl = document.getElementById('risk-list');
+  rl.innerHTML = (appData.risks||[]).map(r=>`
+    <div class="risk-item">
+      <span class="badge badge-${r.severity}">${severityLabel[r.severity]||r.severity}</span>
+      <span class="r-desc">${r.desc}</span>
+    </div>`).join('');
+
+  // Team
+  document.getElementById('team-list').innerHTML = (appData.team_members||[]).map(m=>`<span class="team-chip">👤 ${m}</span>`).join('');
+
+  // Notes
+  document.getElementById('notes-area').value = appData.notes||'';
+}
+
+function renderMilestones() {
+  const milestones = appData.milestones||[];
+  const ml = document.getElementById('milestone-list');
+  ml.innerHTML = milestones.map(m=>`
+    <div class="milestone-item" id="mi-${m.id}">
+      <input type="checkbox" ${m.done?'checked':''} onchange="toggleMilestone(${m.id})">
+      <input type="text" class="m-name-input${m.done?' done':''}" id="mn-${m.id}"
+             value="${escHtml(m.name)}" onblur="updateMilestone(${m.id})">
+      <input type="date" class="m-date-input" id="md-${m.id}"
+             value="${m.date}" onchange="updateMilestone(${m.id})">
+      <button class="m-del-btn" onclick="deleteMilestone(${m.id})" title="刪除">✕</button>
+    </div>`).join('');
+  ml.innerHTML += `<button class="add-btn" style="margin-top:10px" onclick="addMilestone()">＋ 新增里程碑</button>`;
+}
+
+function refreshStats() {
+  const videos = appData.videos||[];
+  const milestones = appData.milestones||[];
+  document.getElementById('stat-total').textContent = videos.length;
+  document.getElementById('stat-live').textContent = videos.filter(v=>v.status==='已上線').length;
+  const done = milestones.filter(m=>m.done).length;
+  document.getElementById('stat-milestone').textContent = done+'/'+milestones.length;
+  document.getElementById('milestone-prog').style.width = (milestones.length?done/milestones.length*100:0)+'%';
+}
+
+async function toggleMilestone(id) {
+  await fetch('/api/milestone/'+id+'/toggle', {method:'POST'});
+  const m = appData.milestones.find(x=>x.id===id);
+  if (m) m.done = !m.done;
+  const inp = document.getElementById('mn-'+id);
+  if (inp) inp.classList.toggle('done', m.done);
+  refreshStats();
+}
+
+async function updateMilestone(id) {
+  const name = document.getElementById('mn-'+id)?.value;
+  const date = document.getElementById('md-'+id)?.value;
+  const m = appData.milestones.find(x=>x.id===id);
+  if (m) { m.name = name; m.date = date; }
+  await fetch('/api/milestones/'+id, {method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name, date})});
+  refreshStats();
+}
+
+async function deleteMilestone(id) {
+  if (!confirm('確定要刪除這個里程碑嗎？')) return;
+  await fetch('/api/milestones/'+id, {method:'DELETE'});
+  appData.milestones = appData.milestones.filter(m=>m.id!==id);
+  renderMilestones();
+  refreshStats();
+}
+
+async function addMilestone() {
+  const today = new Date().toISOString().split('T')[0];
+  const payload = {name:'新里程碑', date: today, done: false};
+  const r = await fetch('/api/milestones', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
+  const d = await r.json();
+  appData.milestones.push(d.milestone);
+  renderMilestones();
+  refreshStats();
+  const newInput = document.getElementById('mn-'+d.milestone.id);
+  if (newInput) { newInput.focus(); newInput.select(); }
+}
+
+async function saveNotes() {
+  const notes = document.getElementById('notes-area').value;
+  await fetch('/api/notes', {method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify({notes})});
+  appData.notes = notes;
+  const t = document.getElementById('notes-toast');
+  t.style.display='inline';
+  setTimeout(()=>t.style.display='none', 2000);
+}
+
+// ── Kanban ──
+function renderKanban() {
+  const videos = appData.videos||[];
+  const board = document.getElementById('kanban-board');
+  board.innerHTML = STATUSES.map(status => {
+    const cards = videos.filter(v=>v.status===status);
+    const cardHTML = cards.length ? cards.map(v=>videoCard(v)).join('') :
+      '<div class="empty" style="padding:20px 10px"><div class="e-icon">—</div></div>';
+    return `<div class="k-col">
+      <div class="k-col-head">
+        <span><span class="status-dot dot-${status}"></span>${status}</span>
+        <span class="k-count">${cards.length}</span>
+      </div>
+      <div class="k-body">
+        ${cardHTML}
+        <button class="add-btn" style="margin-top:4px;font-size:11px;padding:7px" onclick="openAddVideoWithStatus('${status}')">＋ 新增</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function videoCard(v) {
+  const idx = STATUSES.indexOf(v.status);
+  const prevBtn = idx>0 ? `<button class="move-btn" onclick="moveVideo(event,${v.id},-1)">← 上一步</button>` : '';
+  const nextBtn = idx<STATUSES.length-1 ? `<button class="move-btn" onclick="moveVideo(event,${v.id},1)">下一步 →</button>` : '';
+  const ptag = ['TK','YT','IG'].filter(p=>v.platform.includes(p)).map(p=>`<span class="v-tag ${p.toLowerCase()}">${p}</span>`).join('');
+  const dateStr = v.publish_date ? `<div class="v-date">📅 ${v.publish_date}</div>` : `<div class="v-date" style="opacity:.4">📅 未設定日期</div>`;
+  return `<div class="v-card status-${v.status}" onclick="openVideo(${v.id})">
+    <div class="v-title">${v.title}</div>
+    <div class="v-tags">${ptag}</div>
+    <div class="v-type-tag">${v.type}</div>
+    ${dateStr}
+    <div class="move-btns">${prevBtn}${nextBtn}</div>
+  </div>`;
+}
+
+async function moveVideo(e, id, dir) {
+  e.stopPropagation();
+  const v = appData.videos.find(x=>x.id===id);
+  if (!v) return;
+  const idx = STATUSES.indexOf(v.status);
+  const newStatus = STATUSES[idx+dir];
+  if (!newStatus) return;
+  v.status = newStatus;
+  await fetch('/api/videos/'+id, {method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify({status:newStatus})});
+  renderKanban();
+  renderOverview();
+}
+
+// ── Video Modal ──
+function openAddVideoWithStatus(status) {
+  openAddVideo();
+  document.getElementById('vm-status').value = status;
+}
+
+function openAddVideo() {
+  editingVideoId = null;
+  document.getElementById('vm-title').textContent = '新增影片';
+  document.getElementById('vm-id').value = '';
+  document.getElementById('vm-name').value = '';
+  document.getElementById('vm-platform').value = 'TK+YT';
+  document.getElementById('vm-type').value = '';
+  document.getElementById('vm-duration').value = '';
+  document.getElementById('vm-script').value = '';
+  document.getElementById('vm-caption').value = '';
+  document.getElementById('vm-shoot').value = '';
+  document.getElementById('vm-date').value = '';
+  document.getElementById('vm-status').value = '企劃中';
+  document.getElementById('vm-views').value = 0;
+  document.getElementById('vm-likes').value = 0;
+  document.getElementById('vm-comments').value = 0;
+  document.getElementById('vm-del-btn').style.display = 'none';
+  document.getElementById('video-modal').classList.add('open');
+}
+
+function openVideo(id) {
+  const v = appData.videos.find(x=>x.id===id);
+  if (!v) return;
+  editingVideoId = id;
+  document.getElementById('vm-title').textContent = v.title||'影片詳情';
+  document.getElementById('vm-id').value = id;
+  document.getElementById('vm-name').value = v.title||'';
+  document.getElementById('vm-platform').value = v.platform||'TK+YT';
+  document.getElementById('vm-type').value = v.type||'';
+  document.getElementById('vm-duration').value = v.duration||'';
+  document.getElementById('vm-script').value = v.script||'';
+  document.getElementById('vm-caption').value = v.caption||'';
+  document.getElementById('vm-shoot').value = v.shoot_notes||'';
+  document.getElementById('vm-date').value = v.publish_date||'';
+  document.getElementById('vm-status').value = v.status||'企劃中';
+  document.getElementById('vm-views').value = (v.metrics&&v.metrics.views)||0;
+  document.getElementById('vm-likes').value = (v.metrics&&v.metrics.likes)||0;
+  document.getElementById('vm-comments').value = (v.metrics&&v.metrics.comments)||0;
+  document.getElementById('vm-del-btn').style.display = '';
+  document.getElementById('video-modal').classList.add('open');
+}
+
+async function saveVideo() {
+  const payload = {
+    title: document.getElementById('vm-name').value,
+    platform: document.getElementById('vm-platform').value,
+    type: document.getElementById('vm-type').value,
+    duration: document.getElementById('vm-duration').value,
+    script: document.getElementById('vm-script').value,
+    caption: document.getElementById('vm-caption').value,
+    shoot_notes: document.getElementById('vm-shoot').value,
+    publish_date: document.getElementById('vm-date').value,
+    status: document.getElementById('vm-status').value,
+    metrics: {
+      views: parseInt(document.getElementById('vm-views').value)||0,
+      likes: parseInt(document.getElementById('vm-likes').value)||0,
+      comments: parseInt(document.getElementById('vm-comments').value)||0
+    }
+  };
+  if (editingVideoId) {
+    await fetch('/api/videos/'+editingVideoId, {method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
+    Object.assign(appData.videos.find(v=>v.id===editingVideoId), payload);
+  } else {
+    const r = await fetch('/api/videos', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
+    const d = await r.json();
+    appData.videos.push(d.video);
+  }
+  closeModal('video-modal');
+  renderKanban();
+  renderOverview();
+}
+
+async function deleteVideo() {
+  if (!editingVideoId) return;
+  if (!confirm('確定要刪除這支影片嗎？')) return;
+  await fetch('/api/videos/'+editingVideoId, {method:'DELETE'});
+  appData.videos = appData.videos.filter(v=>v.id!==editingVideoId);
+  closeModal('video-modal');
+  renderKanban();
+  renderOverview();
+}
+
+// ── Logs ──
+function renderLogs() {
+  const logs = appData.discussion_log||[];
+  const el = document.getElementById('log-list');
+  if (!logs.length) {
+    el.innerHTML = '<div class="empty"><div class="e-icon">💬</div><p>還沒有討論紀錄，點「新增討論紀錄」開始記錄</p></div>';
+    return;
+  }
+  el.innerHTML = logs.map(l=>`
+    <div class="log-item" id="log-${l.id}">
+      <div class="log-meta">
+        <span class="log-date">📅 ${l.created_at}</span>
+        <button class="log-del" onclick="deleteLog(${l.id})">刪除</button>
+      </div>
+      <div class="log-content">${escHtml(l.content)}</div>
+    </div>`).join('');
+}
+
+function openAddLog() {
+  document.getElementById('lm-content').value = '';
+  document.getElementById('log-modal').classList.add('open');
+}
+
+async function saveLog() {
+  const content = document.getElementById('lm-content').value.trim();
+  if (!content) return;
+  const r = await fetch('/api/logs', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({content})});
+  const d = await r.json();
+  appData.discussion_log.unshift(d.log);
+  closeModal('log-modal');
+  renderLogs();
+}
+
+async function deleteLog(id) {
+  if (!confirm('確定要刪除這筆紀錄嗎？')) return;
+  await fetch('/api/logs/'+id, {method:'DELETE'});
+  appData.discussion_log = appData.discussion_log.filter(l=>l.id!==id);
+  renderLogs();
+}
+
+// ── Utils ──
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function escHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+document.querySelectorAll('.overlay').forEach(o=>{
+  o.addEventListener('click', e=>{ if(e.target===o) o.classList.remove('open'); });
+});
+
+init();
+</script>
+</body>
+</html>

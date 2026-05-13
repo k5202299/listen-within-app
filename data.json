@@ -1,0 +1,194 @@
+{
+  "slug": "listen_within_20260513",
+  "project_name": "Listen Within 療癒之心 社群代操",
+  "client": "Listen Within 療癒之心",
+  "project_type": "其他（社群代操，短影音 + YT 影片全流程企劃製作）",
+  "objective": "為 Listen Within 療癒之心工作室建立 TK / YT 雙平台短影音內容，完整執行企劃、拍攝、剪輯、數據分析，打造品牌知名度並帶動預約轉換",
+  "budget": 0,
+  "start_date": "2026-05-25",
+  "end_date": "2026-08-25",
+  "team_members": [
+    "多多",
+    "芷媗（Candy）"
+  ],
+  "deliverables": [
+    "每月短影音企劃",
+    "TK 影片製作",
+    "YT 影片製作",
+    "每支影片封面截圖",
+    "貼文文案",
+    "每週貼文數據紀錄",
+    "月度數據報告",
+    "內容優化建議"
+  ],
+  "milestones": [
+    {
+      "id": 1,
+      "name": "前期規劃完成",
+      "date": "2026-05-25",
+      "done": false
+    },
+    {
+      "id": 2,
+      "name": "首批影片上線",
+      "date": "2026-06-15",
+      "done": false
+    },
+    {
+      "id": 3,
+      "name": "第一季數據檢討",
+      "date": "2026-08-25",
+      "done": false
+    }
+  ],
+  "risks": [
+    {
+      "id": 1,
+      "desc": "拍攝時間配合度",
+      "severity": "high",
+      "owner": "多多",
+      "status": "open"
+    },
+    {
+      "id": 2,
+      "desc": "老闆出鏡意願變動",
+      "severity": "medium",
+      "owner": "多多",
+      "status": "open"
+    },
+    {
+      "id": 3,
+      "desc": "平台演算法變化",
+      "severity": "low",
+      "owner": "多多",
+      "status": "open"
+    },
+    {
+      "id": 4,
+      "desc": "內容審核限制（醫療界線）",
+      "severity": "medium",
+      "owner": "多多",
+      "status": "open"
+    }
+  ],
+  "notes": "多多負責企劃/拍攝/剪輯/數據分析，Candy 負責出鏡與提供工作室場地。個人帳號與品牌帳號分開經營，不互相導流。內容需避開醫療宣稱，以體驗感受為主要敘事角度。多多在台北、Candy 在台南，每次南下拍攝須最大化素材量，規劃以兩天一夜為單位，一次完成多支影片的拍攝。",
+  "status": "active",
+  "created_at": "2026-05-13",
+  "videos": [
+    {
+      "id": 1,
+      "title": "ASMR 采耳過程",
+      "platform": "TK+YT",
+      "type": "ASMR 感官引流",
+      "status": "企劃中",
+      "duration": "60-90秒",
+      "script": "純采耳過程近拍，工具入耳聲音放大，背景輕音樂或無聲。開場工具排列特寫，中段采耳過程，結尾客人閉眼放鬆定格。",
+      "caption": "第一次體驗的人，通常五分鐘內就睡著了 👂",
+      "shoot_notes": "手機+微距鏡頭夾片、補光燈、安靜環境。不需要 Candy 出鏡，手部特寫即可。",
+      "publish_date": "",
+      "cover_url": "",
+      "metrics": {
+        "views": 0,
+        "likes": 0,
+        "comments": 0
+      },
+      "created_at": "2026-05-13"
+    },
+    {
+      "id": 2,
+      "title": "銀珠洗眼是什麼？",
+      "platform": "TK",
+      "type": "服務揭秘",
+      "status": "企劃中",
+      "duration": "30-45秒",
+      "script": "開場文字：「你聽過銀珠洗眼嗎？」→ Candy 手持銀珠說「這個東西，放進眼睛裡。」（停頓）→ 服務過程近拍 → 結尾：「做完之後眼睛感覺被洗過一樣。」",
+      "caption": "很多人連聽都沒聽過這個服務 👁️ 第一次看到銀珠的人都問我：「這要放哪裡？」",
+      "shoot_notes": "銀珠道具特寫、服務過程側拍與正拍各一角度。需要 Candy 簡短說話。",
+      "publish_date": "",
+      "cover_url": "",
+      "metrics": {
+        "views": 0,
+        "likes": 0,
+        "comments": 0
+      },
+      "created_at": "2026-05-13"
+    },
+    {
+      "id": 3,
+      "title": "Candy 自我介紹 × 品牌故事",
+      "platform": "TK+YT",
+      "type": "人設建立",
+      "status": "企劃中",
+      "duration": "45-60秒",
+      "script": "Candy 坐在工作室面對鏡頭：「我是 Candy，我在台南開了一個叫 Listen Within 的空間。大家以為我只是在幫人清耳朵⋯⋯但其實不只是這樣。」帶出采耳＋情緒陪伴，結尾：「我希望每個來這裡的人，都能好好睡一場。」穿插工作室 B-roll。",
+      "caption": "",
+      "shoot_notes": "Candy 出鏡必要，工作室環境，自然光或柔光燈。建議第一天狀態好時拍。",
+      "publish_date": "",
+      "cover_url": "",
+      "metrics": {
+        "views": 0,
+        "likes": 0,
+        "comments": 0
+      },
+      "created_at": "2026-05-13"
+    },
+    {
+      "id": 4,
+      "title": "耳燭點燃的那一刻",
+      "platform": "TK+YT",
+      "type": "ASMR + 服務揭秘",
+      "status": "企劃中",
+      "duration": "60秒",
+      "script": "耳燭插入耳朵側拍 → Candy 點火 → 近拍燃燒過程煙霧聲音 → Candy OS：「耳燭在燃燒的時候，你能感覺到一股暖流⋯⋯然後整個人開始放空。」→ 熄滅、Candy 微笑。",
+      "caption": "很多人第一次看到這個畫面都嚇到 🕯️ 但做完之後都說：「這什麼魔法？」",
+      "shoot_notes": "耳燭特寫、點火畫面、側拍燃燒過程。安靜環境，注意防風。",
+      "publish_date": "",
+      "cover_url": "",
+      "metrics": {
+        "views": 0,
+        "likes": 0,
+        "comments": 0
+      },
+      "created_at": "2026-05-13"
+    },
+    {
+      "id": 5,
+      "title": "你上次好好照顧自己是什麼時候？",
+      "platform": "TK",
+      "type": "情緒共鳴",
+      "status": "企劃中",
+      "duration": "30-45秒",
+      "script": "Candy 出鏡直視鏡頭：「你上次好好照顧自己，是什麼時候？」（停頓 2 秒）「不是健身、不是護膚，是真的讓自己的腦袋安靜下來那種。」「很多人來這裡，不是因為耳朵不舒服，是因為太久沒有被好好對待了。」結尾帶工作室畫面，文字：Listen Within。",
+      "caption": "",
+      "shoot_notes": "Candy 出鏡必要，極簡背景或工作室角落，無需特效。語氣輕而真實。",
+      "publish_date": "",
+      "cover_url": "",
+      "metrics": {
+        "views": 0,
+        "likes": 0,
+        "comments": 0
+      },
+      "created_at": "2026-05-13"
+    },
+    {
+      "id": 6,
+      "title": "工作室環境走鏡",
+      "platform": "TK+YT",
+      "type": "氛圍 B-roll",
+      "status": "企劃中",
+      "duration": "30-45秒",
+      "script": "純 B-roll 無說話。鏡頭慢移：門口 → 等候區 → 工具擺設 → 燈光細節 → 躺椅。搭配品牌音樂或海浪音效。結尾文字：台南｜Listen Within｜療癒之心。",
+      "caption": "",
+      "shoot_notes": "穩定器或慢速手持，工作室全開燈＋局部氛圍燈。黃金時段自然光更好。不需要 Candy 出鏡。",
+      "publish_date": "",
+      "cover_url": "",
+      "metrics": {
+        "views": 0,
+        "likes": 0,
+        "comments": 0
+      },
+      "created_at": "2026-05-13"
+    }
+  ],
+  "discussion_log": []
+}
