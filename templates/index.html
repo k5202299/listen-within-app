@@ -2,6 +2,8 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <title>Listen Within | 專案管理</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -177,25 +179,47 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;ba
 
 /* ── Mobile ── */
 @media(max-width:768px){
-  .header{flex-direction:column;gap:10px;padding:14px 16px}
-  .header-right{text-align:left;font-size:11px}
-  .header-left h1{font-size:15px}
-  .tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;padding:0 16px}
-  .tab{padding:12px 12px;font-size:13px;white-space:nowrap}
-  .content{padding:14px 16px}
+  .d-none-mobile{display:none!important}
+  /* Header: compact single row */
+  .header{padding:12px 16px}
+  .header-left h1{font-size:14px}
+  .header-left p{font-size:11px;opacity:.5}
+  /* Tabs */
+  .tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;padding:0 12px}
+  .tab{padding:12px 10px;font-size:13px;min-height:44px;display:flex;align-items:center}
+  /* Content */
+  .content{padding:12px 14px;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px))}
+  .card{padding:14px}
+  /* Grids */
   .grid-4{grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
   .grid-2{grid-template-columns:1fr}
   .stat .s-value{font-size:22px}
-  .kanban{display:flex;overflow-x:auto;-webkit-overflow-scrolling:touch;gap:10px;padding-bottom:12px}
-  .k-col{min-width:210px;flex-shrink:0}
-  .modal{width:95vw;max-width:95vw;padding:20px 18px;border-radius:16px}
+  /* Milestone: wrap to 2 rows on phone */
+  .milestone-item{flex-wrap:wrap;row-gap:4px;padding:10px 0}
+  .milestone-item input[type=checkbox]{align-self:flex-start;margin-top:8px;margin-right:8px}
+  .m-name-input{flex:1 1 160px;min-width:0;margin-right:0}
+  .m-date-input{flex:1 1 130px;width:auto;margin-left:25px;margin-right:4px}
+  .m-del-btn{align-self:center}
+  /* Kanban: horizontal scroll, hide scrollbar */
+  .kanban{display:flex;overflow-x:auto;-webkit-overflow-scrolling:touch;gap:10px;padding-bottom:8px;scrollbar-width:none}
+  .kanban::-webkit-scrollbar{display:none}
+  .k-col{min-width:230px;flex-shrink:0}
+  /* Video cards */
+  .v-card{padding:11px}
+  .v-title{font-size:13px}
+  .move-btn{font-size:10px;padding:4px 7px;min-height:32px}
+  /* Videos tab top bar */
+  .videos-top-bar{flex-direction:column;gap:10px;align-items:stretch}
+  /* Modal */
+  .modal{width:calc(100vw - 24px);max-width:none;max-height:90vh;padding:18px 16px;border-radius:16px}
   .modal-head h2{font-size:16px}
   .fg-row,.fg-row3{grid-template-columns:1fr}
   .btn-row{flex-wrap:wrap;gap:8px}
-  .card{padding:16px}
-  .add-btn{font-size:13px}
-  .v-card{padding:10px}
-  .v-title{font-size:12px}
+  .btn-row .btn{flex:1;min-width:calc(50% - 5px);text-align:center}
+  /* Touch targets */
+  .btn{min-height:42px}
+  .add-btn{min-height:44px;font-size:13px}
+  button,.tab,.v-card,.move-btn{touch-action:manipulation}
 }
 </style>
 </head>
@@ -207,9 +231,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;ba
     <p>{{ data.client }} &nbsp;·&nbsp; {{ data.start_date }} → {{ data.end_date }}</p>
   </div>
   <div class="header-right">
-    <div>成員：{{ data.team_members | join('、') }}</div>
+    <div class="d-none-mobile">成員：{{ data.team_members | join('、') }}</div>
     <div style="margin-top:4px;display:flex;align-items:center;gap:10px">
-      <span>第一季檢核：2026-08-25</span>
+      <span class="d-none-mobile">第一季檢核：2026-08-25</span>
       <button class="logout-btn" onclick="location.href='/logout'">登出</button>
     </div>
   </div>
@@ -290,7 +314,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;ba
 
 <!-- ═══ TAB 2: 影片追蹤 ═══ -->
 <div id="tab-videos" class="tab-panel">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+  <div class="videos-top-bar" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
     <div style="font-size:13px;color:#64748b">點擊影片卡片可編輯詳細內容，點「→」可移動狀態</div>
     <button class="btn btn-primary btn-sm" onclick="openAddVideo()">＋ 新增影片</button>
   </div>
