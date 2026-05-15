@@ -168,6 +168,19 @@ def delete_video(vid):
 
 # ── Logs ──────────────────────────────────────────────────────────────────────
 
+@app.route('/api/trash/<int:vid>/restore', methods=['POST'])
+def restore_video(vid):
+    data = load()
+    if 'trash' not in data:
+        data['trash'] = []
+    video = next((v for v in data['trash'] if v['id'] == vid), None)
+    if video:
+        restored = {k: v for k, v in video.items() if k not in ('deleted_at', 'delete_reason')}
+        data['videos'].append(restored)
+        data['trash'] = [v for v in data['trash'] if v['id'] != vid]
+    save(data)
+    return jsonify({'ok': True})
+
 @app.route('/api/logs', methods=['POST'])
 def add_log():
     data = load()

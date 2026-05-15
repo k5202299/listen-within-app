@@ -794,22 +794,54 @@ function renderTrash() {
   }
   el.innerHTML = trash.map(v=>`
     <div class="trash-card">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:10px">
         <div style="flex:1">
-          <div style="font-size:15px;font-weight:600;color:#1e293b;margin-bottom:6px">${escHtml(v.title||'')}</div>
+          <div style="font-size:16px;font-weight:700;color:#1e293b;margin-bottom:8px">${escHtml(v.title||'')}</div>
           <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
             ${['TK','YT','IG'].filter(p=>v.platform&&v.platform.includes(p)).map(p=>`<span class="v-tag ${p.toLowerCase()}">${p}</span>`).join('')}
-            ${v.type?`<span style="font-size:11px;color:#94a3b8">${escHtml(v.type)}</span>`:''}
+            ${v.type?`<span style="font-size:11px;color:#94a3b8;background:#f1f5f9;padding:2px 8px;border-radius:5px">${escHtml(v.type)}</span>`:''}
+            ${v.duration?`<span style="font-size:11px;color:#94a3b8">⏱ ${escHtml(v.duration)}</span>`:''}
           </div>
-          ${v.delete_reason
-            ? `<div class="trash-reason">💬 ${escHtml(v.delete_reason)}</div>`
-            : '<div class="trash-no-reason">（未填寫放棄原因）</div>'}
         </div>
         <div style="flex-shrink:0;text-align:right">
           <span style="font-size:11px;color:#94a3b8;background:#f8fafc;padding:3px 10px;border-radius:20px;white-space:nowrap">🗑️ ${escHtml(v.deleted_at||'')}</span>
         </div>
       </div>
+
+      ${v.delete_reason
+        ? `<div class="trash-reason">💬 <strong>放棄原因：</strong>${escHtml(v.delete_reason)}</div>`
+        : '<div class="trash-no-reason">（未填寫放棄原因）</div>'}
+
+      ${(v.script||v.caption||v.shoot_notes||v.media_url||v.notes||v.publish_date||(v.metrics&&(v.metrics.views||v.metrics.likes||v.metrics.comments)))?`
+      <div style="border-top:1px solid #fee2e2;margin-top:12px;padding-top:12px;display:flex;flex-direction:column;gap:10px">
+        ${v.publish_date?`<div style="font-size:12px;color:#64748b">📅 預定上線：${escHtml(v.publish_date)}</div>`:''}
+        ${v.script?`<div><div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">腳本說明</div><div style="font-size:13px;color:#334155;line-height:1.6;white-space:pre-wrap">${escHtml(v.script)}</div></div>`:''}
+        ${v.caption?`<div><div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">貼文文案</div><div style="font-size:13px;color:#334155;line-height:1.6;white-space:pre-wrap">${escHtml(v.caption)}</div></div>`:''}
+        ${v.shoot_notes?`<div><div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">拍攝注意事項</div><div style="font-size:13px;color:#334155;line-height:1.6;white-space:pre-wrap">${escHtml(v.shoot_notes)}</div></div>`:''}
+        ${v.media_url?`<div><div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">媒體連結</div><a href="${escHtml(v.media_url)}" target="_blank" style="font-size:13px;color:#3b82f6;word-break:break-all">${escHtml(v.media_url)}</a></div>`:''}
+        ${v.notes?`<div><div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">備註</div><div style="font-size:13px;color:#334155;line-height:1.6;white-space:pre-wrap">${escHtml(v.notes)}</div></div>`:''}
+        ${v.metrics&&(v.metrics.views||v.metrics.likes||v.metrics.comments)?`<div style="display:flex;gap:16px;font-size:12px;color:#64748b">
+          <span>👁 ${v.metrics.views||0}</span><span>❤️ ${v.metrics.likes||0}</span><span>💬 ${v.metrics.comments||0}</span>
+        </div>`:''}
+      </div>`:''}
+
+      <div style="margin-top:14px;display:flex;justify-content:flex-end">
+        <button class="btn btn-ghost btn-sm" onclick="restoreVideo(${v.id})">↩ 還原到影片追蹤</button>
+      </div>
     </div>`).join('');
+}
+
+async function restoreVideo(id) {
+  const idx = appData.trash.findIndex(v=>v.id===id);
+  if (idx===-1) return;
+  const v = appData.trash[idx];
+  const restored = Object.fromEntries(Object.entries(v).filter(([k])=>k!=='deleted_at'&&k!=='delete_reason'));
+  appData.videos.push(restored);
+  appData.trash.splice(idx, 1);
+  await fetch('/api/trash/'+id+'/restore', {method:'POST'});
+  renderTrash();
+  renderKanban();
+  renderOverview();
 }
 
 // ── Logs ──
