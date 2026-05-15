@@ -153,7 +153,16 @@ def update_video(vid):
 @app.route('/api/videos/<int:vid>', methods=['DELETE'])
 def delete_video(vid):
     data = load()
-    data['videos'] = [v for v in data['videos'] if v['id'] != vid]
+    if 'trash' not in data:
+        data['trash'] = []
+    body = request.json or {}
+    reason = body.get('reason', '')
+    video = next((v for v in data['videos'] if v['id'] == vid), None)
+    if video:
+        video['deleted_at'] = datetime.now().strftime('%Y-%m-%d %H:%M')
+        video['delete_reason'] = reason
+        data['trash'].insert(0, video)
+        data['videos'] = [v for v in data['videos'] if v['id'] != vid]
     save(data)
     return jsonify({'ok': True})
 

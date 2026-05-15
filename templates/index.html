@@ -167,6 +167,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;ba
 .dot-待上線{background:#8b5cf6}
 .dot-已上線{background:#10b981}
 
+/* Trash */
+.trash-card{background:white;border-radius:12px;padding:18px;box-shadow:0 1px 4px rgba(0,0,0,.07);margin-bottom:12px;border-left:3px solid #fca5a5}
+.trash-reason{font-size:13px;color:#64748b;background:#fef2f2;padding:8px 12px;border-radius:7px;margin-top:8px;line-height:1.5}
+.trash-no-reason{font-size:12px;color:#cbd5e1;margin-top:6px;font-style:italic}
+
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:#f1f5f9}
 ::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}
@@ -243,6 +248,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;ba
   <div class="tab active" onclick="switchTab('overview')">📋 專案概覽</div>
   <div class="tab" onclick="switchTab('videos')">🎬 影片追蹤</div>
   <div class="tab" onclick="switchTab('logs')">💬 討論紀錄</div>
+  <div class="tab" onclick="switchTab('trash')">🗑️ 垃圾桶</div>
 </div>
 
 <div class="content">
@@ -330,6 +336,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;ba
   <div class="card">
     <div id="log-list"></div>
   </div>
+</div>
+
+<!-- ═══ TAB 4: 垃圾桶 ═══ -->
+<div id="tab-trash" class="tab-panel">
+  <div style="margin-bottom:18px">
+    <span style="font-size:13px;color:#64748b">已放棄的影片企劃，保存放棄原因供日後參考</span>
+  </div>
+  <div id="trash-list"></div>
 </div>
 
 </div><!-- /content -->
@@ -423,10 +437,39 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;ba
       </div>
     </div>
 
+    <div class="fg">
+      <label>媒體連結</label>
+      <input id="vm-media" type="url" placeholder="貼上 Google Photos、Imgur、YouTube 等媒體連結">
+    </div>
+
+    <div class="fg">
+      <label>備註</label>
+      <textarea id="vm-notes" style="min-height:70px" placeholder="記錄企劃想法、執行狀況、任何備忘…"></textarea>
+    </div>
+
     <div class="btn-row">
-      <button class="btn btn-danger btn-sm" id="vm-del-btn" onclick="deleteVideo()">刪除</button>
+      <button class="btn btn-danger btn-sm" id="vm-del-btn" onclick="deleteVideo()">移入垃圾桶</button>
       <button class="btn btn-ghost btn-sm" onclick="closeModal('video-modal')">取消</button>
       <button class="btn btn-primary btn-sm" onclick="saveVideo()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Modal: Delete Confirm ═══ -->
+<div class="overlay" id="delete-modal">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-head">
+      <h2>移入垃圾桶</h2>
+      <button class="modal-close" onclick="closeModal('delete-modal')">×</button>
+    </div>
+    <p style="font-size:14px;color:#64748b;margin-bottom:16px">這支影片將移入垃圾桶，可在「垃圾桶」分頁查看歷史紀錄。</p>
+    <div class="fg">
+      <label>放棄原因（選填）</label>
+      <textarea id="dm-reason" style="min-height:100px" placeholder="例：拍攝資源不足、企劃方向調整、Candy 覺得不適合品牌調性…"></textarea>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('delete-modal')">取消</button>
+      <button class="btn btn-danger btn-sm" onclick="confirmDeleteVideo()">確認移入垃圾桶</button>
     </div>
   </div>
 </div>
@@ -456,6 +499,7 @@ let editingVideoId = null;
 
 // ── Init ──
 function init() {
+  if (!appData.trash) appData.trash = [];
   renderOverview();
   renderKanban();
   renderLogs();
@@ -464,11 +508,12 @@ function init() {
 // ── Tab switch ──
 function switchTab(name) {
   document.querySelectorAll('.tab').forEach((t,i)=>{
-    const names=['overview','videos','logs'];
+    const names=['overview','videos','logs','trash'];
     t.classList.toggle('active', names[i]===name);
   });
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
   document.getElementById('tab-'+name).classList.add('active');
+  if (name==='trash') renderTrash();
 }
 
 // ── Overview ──
@@ -650,6 +695,8 @@ function openAddVideo() {
   document.getElementById('vm-views').value = 0;
   document.getElementById('vm-likes').value = 0;
   document.getElementById('vm-comments').value = 0;
+  document.getElementById('vm-media').value = '';
+  document.getElementById('vm-notes').value = '';
   document.getElementById('vm-del-btn').style.display = 'none';
   document.getElementById('video-modal').classList.add('open');
 }
@@ -672,6 +719,8 @@ function openVideo(id) {
   document.getElementById('vm-views').value = (v.metrics&&v.metrics.views)||0;
   document.getElementById('vm-likes').value = (v.metrics&&v.metrics.likes)||0;
   document.getElementById('vm-comments').value = (v.metrics&&v.metrics.comments)||0;
+  document.getElementById('vm-media').value = v.media_url||'';
+  document.getElementById('vm-notes').value = v.notes||'';
   document.getElementById('vm-del-btn').style.display = '';
   document.getElementById('video-modal').classList.add('open');
 }
@@ -687,6 +736,8 @@ async function saveVideo() {
     shoot_notes: document.getElementById('vm-shoot').value,
     publish_date: document.getElementById('vm-date').value,
     status: document.getElementById('vm-status').value,
+    media_url: document.getElementById('vm-media').value,
+    notes: document.getElementById('vm-notes').value,
     metrics: {
       views: parseInt(document.getElementById('vm-views').value)||0,
       likes: parseInt(document.getElementById('vm-likes').value)||0,
@@ -706,14 +757,59 @@ async function saveVideo() {
   renderOverview();
 }
 
-async function deleteVideo() {
+function deleteVideo() {
   if (!editingVideoId) return;
-  if (!confirm('確定要刪除這支影片嗎？')) return;
-  await fetch('/api/videos/'+editingVideoId, {method:'DELETE'});
-  appData.videos = appData.videos.filter(v=>v.id!==editingVideoId);
+  document.getElementById('dm-reason').value = '';
+  document.getElementById('delete-modal').classList.add('open');
+}
+
+async function confirmDeleteVideo() {
+  const reason = document.getElementById('dm-reason').value.trim();
+  const v = appData.videos.find(x=>x.id===editingVideoId);
+  if (!v) return;
+  const trashed = Object.assign({}, v, {
+    deleted_at: new Date().toLocaleString('zh-TW', {timeZone:'Asia/Taipei', hour12:false}).replace(/\//g,'-'),
+    delete_reason: reason
+  });
+  appData.trash.unshift(trashed);
+  appData.videos = appData.videos.filter(x=>x.id!==editingVideoId);
+  await fetch('/api/videos/'+editingVideoId, {
+    method:'DELETE',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({reason})
+  });
+  closeModal('delete-modal');
   closeModal('video-modal');
   renderKanban();
   renderOverview();
+}
+
+// ── Trash ──
+function renderTrash() {
+  const trash = appData.trash||[];
+  const el = document.getElementById('trash-list');
+  if (!trash.length) {
+    el.innerHTML = '<div class="empty"><div class="e-icon">🗑️</div><p>垃圾桶是空的</p></div>';
+    return;
+  }
+  el.innerHTML = trash.map(v=>`
+    <div class="trash-card">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px">
+        <div style="flex:1">
+          <div style="font-size:15px;font-weight:600;color:#1e293b;margin-bottom:6px">${escHtml(v.title||'')}</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+            ${['TK','YT','IG'].filter(p=>v.platform&&v.platform.includes(p)).map(p=>`<span class="v-tag ${p.toLowerCase()}">${p}</span>`).join('')}
+            ${v.type?`<span style="font-size:11px;color:#94a3b8">${escHtml(v.type)}</span>`:''}
+          </div>
+          ${v.delete_reason
+            ? `<div class="trash-reason">💬 ${escHtml(v.delete_reason)}</div>`
+            : '<div class="trash-no-reason">（未填寫放棄原因）</div>'}
+        </div>
+        <div style="flex-shrink:0;text-align:right">
+          <span style="font-size:11px;color:#94a3b8;background:#f8fafc;padding:3px 10px;border-radius:20px;white-space:nowrap">🗑️ ${escHtml(v.deleted_at||'')}</span>
+        </div>
+      </div>
+    </div>`).join('');
 }
 
 // ── Logs ──
