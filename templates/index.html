@@ -447,10 +447,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;ba
       <textarea id="vm-notes" style="min-height:70px" placeholder="記錄企劃想法、執行狀況、任何備忘…"></textarea>
     </div>
 
+    <div id="vm-trash-info" style="display:none;background:#fef2f2;border-radius:9px;padding:12px 14px;margin-bottom:4px">
+      <div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">放棄原因</div>
+      <div id="vm-trash-reason" style="font-size:13px;color:#334155;line-height:1.5"></div>
+      <div id="vm-trash-date" style="font-size:11px;color:#94a3b8;margin-top:6px"></div>
+    </div>
+
     <div class="btn-row">
       <button class="btn btn-danger btn-sm" id="vm-del-btn" onclick="deleteVideo()">移入垃圾桶</button>
+      <button class="btn btn-primary btn-sm" id="vm-restore-btn" style="display:none" onclick="restoreFromModal()">↩ 還原到影片追蹤</button>
       <button class="btn btn-ghost btn-sm" onclick="closeModal('video-modal')">取消</button>
-      <button class="btn btn-primary btn-sm" onclick="saveVideo()">儲存</button>
+      <button class="btn btn-primary btn-sm" id="vm-save-btn" onclick="saveVideo()">儲存</button>
     </div>
   </div>
 </div>
@@ -496,6 +503,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;ba
 const STATUSES = ['企劃中','待拍攝','剪輯中','待上線','已上線'];
 let appData = {{ data | tojson }};
 let editingVideoId = null;
+let viewingTrashId = null;
 
 // ── Init ──
 function init() {
@@ -793,41 +801,22 @@ function renderTrash() {
     return;
   }
   el.innerHTML = trash.map(v=>`
-    <div class="trash-card">
+    <div class="trash-card" onclick="openTrashVideo(${v.id})" style="cursor:pointer;transition:box-shadow .2s,transform .2s" onmouseover="this.style.boxShadow='0 4px 14px rgba(0,0,0,.12)';this.style.transform='translateY(-1px)'" onmouseout="this.style.boxShadow='';this.style.transform=''">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:10px">
         <div style="flex:1">
-          <div style="font-size:16px;font-weight:700;color:#1e293b;margin-bottom:8px">${escHtml(v.title||'')}</div>
+          <div style="font-size:15px;font-weight:600;color:#1e293b;margin-bottom:7px">${escHtml(v.title||'')}</div>
           <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
             ${['TK','YT','IG'].filter(p=>v.platform&&v.platform.includes(p)).map(p=>`<span class="v-tag ${p.toLowerCase()}">${p}</span>`).join('')}
-            ${v.type?`<span style="font-size:11px;color:#94a3b8;background:#f1f5f9;padding:2px 8px;border-radius:5px">${escHtml(v.type)}</span>`:''}
-            ${v.duration?`<span style="font-size:11px;color:#94a3b8">⏱ ${escHtml(v.duration)}</span>`:''}
+            ${v.type?`<span style="font-size:10px;color:#94a3b8">${escHtml(v.type)}</span>`:''}
           </div>
         </div>
         <div style="flex-shrink:0;text-align:right">
           <span style="font-size:11px;color:#94a3b8;background:#f8fafc;padding:3px 10px;border-radius:20px;white-space:nowrap">🗑️ ${escHtml(v.deleted_at||'')}</span>
         </div>
       </div>
-
       ${v.delete_reason
-        ? `<div class="trash-reason">💬 <strong>放棄原因：</strong>${escHtml(v.delete_reason)}</div>`
+        ? `<div class="trash-reason">💬 ${escHtml(v.delete_reason)}</div>`
         : '<div class="trash-no-reason">（未填寫放棄原因）</div>'}
-
-      ${(v.script||v.caption||v.shoot_notes||v.media_url||v.notes||v.publish_date||(v.metrics&&(v.metrics.views||v.metrics.likes||v.metrics.comments)))?`
-      <div style="border-top:1px solid #fee2e2;margin-top:12px;padding-top:12px;display:flex;flex-direction:column;gap:10px">
-        ${v.publish_date?`<div style="font-size:12px;color:#64748b">📅 預定上線：${escHtml(v.publish_date)}</div>`:''}
-        ${v.script?`<div><div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">腳本說明</div><div style="font-size:13px;color:#334155;line-height:1.6;white-space:pre-wrap">${escHtml(v.script)}</div></div>`:''}
-        ${v.caption?`<div><div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">貼文文案</div><div style="font-size:13px;color:#334155;line-height:1.6;white-space:pre-wrap">${escHtml(v.caption)}</div></div>`:''}
-        ${v.shoot_notes?`<div><div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">拍攝注意事項</div><div style="font-size:13px;color:#334155;line-height:1.6;white-space:pre-wrap">${escHtml(v.shoot_notes)}</div></div>`:''}
-        ${v.media_url?`<div><div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">媒體連結</div><a href="${escHtml(v.media_url)}" target="_blank" style="font-size:13px;color:#3b82f6;word-break:break-all">${escHtml(v.media_url)}</a></div>`:''}
-        ${v.notes?`<div><div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">備註</div><div style="font-size:13px;color:#334155;line-height:1.6;white-space:pre-wrap">${escHtml(v.notes)}</div></div>`:''}
-        ${v.metrics&&(v.metrics.views||v.metrics.likes||v.metrics.comments)?`<div style="display:flex;gap:16px;font-size:12px;color:#64748b">
-          <span>👁 ${v.metrics.views||0}</span><span>❤️ ${v.metrics.likes||0}</span><span>💬 ${v.metrics.comments||0}</span>
-        </div>`:''}
-      </div>`:''}
-
-      <div style="margin-top:14px;display:flex;justify-content:flex-end">
-        <button class="btn btn-ghost btn-sm" onclick="restoreVideo(${v.id})">↩ 還原到影片追蹤</button>
-      </div>
     </div>`).join('');
 }
 
@@ -842,6 +831,43 @@ async function restoreVideo(id) {
   renderTrash();
   renderKanban();
   renderOverview();
+}
+
+function openTrashVideo(id) {
+  const v = appData.trash.find(x=>x.id===id);
+  if (!v) return;
+  viewingTrashId = id;
+  editingVideoId = null;
+  document.getElementById('vm-title').textContent = v.title||'影片詳情';
+  document.getElementById('vm-name').value = v.title||'';
+  document.getElementById('vm-platform').value = v.platform||'TK+YT';
+  document.getElementById('vm-type').value = v.type||'';
+  document.getElementById('vm-duration').value = v.duration||'';
+  document.getElementById('vm-script').value = v.script||'';
+  document.getElementById('vm-caption').value = v.caption||'';
+  document.getElementById('vm-shoot').value = v.shoot_notes||'';
+  document.getElementById('vm-date').value = v.publish_date||'';
+  document.getElementById('vm-status').value = v.status||'企劃中';
+  document.getElementById('vm-views').value = (v.metrics&&v.metrics.views)||0;
+  document.getElementById('vm-likes').value = (v.metrics&&v.metrics.likes)||0;
+  document.getElementById('vm-comments').value = (v.metrics&&v.metrics.comments)||0;
+  document.getElementById('vm-media').value = v.media_url||'';
+  document.getElementById('vm-notes').value = v.notes||'';
+  // trash info block
+  document.getElementById('vm-trash-reason').textContent = v.delete_reason||'（未填寫放棄原因）';
+  document.getElementById('vm-trash-date').textContent = '🗑️ 移入時間：'+(v.deleted_at||'');
+  document.getElementById('vm-trash-info').style.display = '';
+  // buttons
+  document.getElementById('vm-del-btn').style.display = 'none';
+  document.getElementById('vm-restore-btn').style.display = '';
+  document.getElementById('vm-save-btn').style.display = 'none';
+  document.getElementById('video-modal').classList.add('open');
+}
+
+function restoreFromModal() {
+  if (!viewingTrashId) return;
+  restoreVideo(viewingTrashId);
+  closeModal('video-modal');
 }
 
 // ── Logs ──
@@ -885,7 +911,16 @@ async function deleteLog(id) {
 }
 
 // ── Utils ──
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  if (id === 'video-modal') {
+    viewingTrashId = null;
+    document.getElementById('vm-trash-info').style.display = 'none';
+    document.getElementById('vm-del-btn').style.display = '';
+    document.getElementById('vm-restore-btn').style.display = 'none';
+    document.getElementById('vm-save-btn').style.display = '';
+  }
+}
 function escHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 document.querySelectorAll('.overlay').forEach(o=>{
